@@ -60,7 +60,7 @@ class RainbowBlockBreaker {
         const ball = new Particle(465 / 2, 465 / 2);
         ball.vx = Math.random() * 10;
         ball.vy = Math.random() * 9 - 1;
-        ball.color = "#FFFFFF"
+        ball.color = [255, 255, 255]
         this.balls = new Array();
         this.balls.push(ball);
         document.addEventListener("mousemove", (e) => {
@@ -80,9 +80,12 @@ class RainbowBlockBreaker {
 
     update() {
         const _this = this;
+        _this.ctx.resetTransform()
         _this.blocks.values.forEach(block => {
             if (block) {
-                _this.ctx.putImageData(new ImageData(new Uint8ClampedArray([block.color[0], block.color[1], block.color[2], 255]), 1, 1), block.x, block.y);
+                // _this.ctx.putImageData(new ImageData(new Uint8ClampedArray([block.color[0], block.color[1], block.color[2], 255]), 1, 1), block.x, block.y);
+                _this.ctx.fillStyle = `rgb(${block.color[0]}, ${block.color[1]}, ${block.color[2]})`;
+                _this.ctx.fillRect(block.x, block.y, 1, 1)
             }
         });
         const removedBalls = new Array();
@@ -92,9 +95,9 @@ class RainbowBlockBreaker {
             for (let i = 0; i < ballSpeed; i++) {
                 ball.x += ball.vx / ballSpeed;
                 ball.y += ball.vy / ballSpeed;
-                const hitParticle = _this.blocks.getParticle(ball.x, ball.y);
+                const hitParticle = _this.blocks.getParticle(parseInt(ball.x), parseInt(ball.y));
                 if (hitParticle) {
-                    const removedParticle = _this.blocks.removeParticle(ball.x, ball.y);
+                    const removedParticle = _this.blocks.removeParticle(parseInt(ball.x), parseInt(ball.y));
                     removedParticle.vx = Math.cos(ballRadius + Math.PI * 2 / (30 * Math.random()) - 15) * 3;
                     removedParticle.vy = 1;
                     removedParticle.color = hitParticle.color;
@@ -102,6 +105,7 @@ class RainbowBlockBreaker {
                     ball.vy = -ball.vy;
                 }
                 if ((ball.x < 0 && ball.vx < 0) || (ball.x > RainbowBlockBreaker.WIDTH && ball.vx > 0)) {
+
                     ball.vx = -ball.vx;
                 }
                 if (ball.y < 0 && ball.vy < 0) {
@@ -113,7 +117,8 @@ class RainbowBlockBreaker {
                 if (RainbowBlockBreaker.hitTestPoint(_this.bar, ball)) {
                     ball.vy = -Math.abs(ball.vy);
                 }
-                _this.ctx.putImageData(new ImageData(new Uint8ClampedArray([ball.color[0], ball.color[1], ball.color[2], 255]), 1, 1), ball.x, ball.y);
+                _this.ctx.fillStyle = `rgb(${ball.color[0]}, ${ball.color[1]}, ${ball.color[2]})`;
+                _this.ctx.fillRect(ball.x, ball.y, 1, 1);
             }
         })
         removedBalls.forEach(function (particle) {
@@ -128,13 +133,14 @@ class RainbowBlockBreaker {
             fallParticle.vy += 0.1;
             fallParticle.x += fallParticle.vx;
             fallParticle.y += fallParticle.vy;
-            _this.ctx.putImageData(new ImageData(new Uint8ClampedArray([fallParticle.color[0], fallParticle.color[1], fallParticle.color[2], 255]), 1, 1), fallParticle.x, fallParticle.y);
+            _this.ctx.fillStyle = `rgb(${fallParticle.color[0]}, ${fallParticle.color[1]}, ${fallParticle.color[2]})`;
+            _this.ctx.fillRect(fallParticle.x, fallParticle.y, 1, 1);
             if (RainbowBlockBreaker.hitTestPoint(_this.bar, fallParticle)) {
                 const newBall = new Particle(fallParticle.x, fallParticle.y);
                 newBall.vx = Math.random() * 10;
                 newBall.vy = Math.random() * 9 + 1;
-                newball.color = fallParticle.color;
-                _this.balls.push(newball);
+                newBall.color = fallParticle.color;
+                _this.balls.push(newBall);
                 removedFallBlocks.push(fallParticle);
             } else if (fallParticle.y > RainbowBlockBreaker.HEIGHT) {
                 removedFallBlocks.push(fallParticle);
