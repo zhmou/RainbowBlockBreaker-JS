@@ -63,9 +63,15 @@ class RainbowBlockBreaker {
         ball.color = [255, 255, 255]
         this.balls = new Array();
         this.balls.push(ball);
+
+        this.offscreenCanvas = document.createElement('canvas');
+        this.offscreenCanvas.width = RainbowBlockBreaker.WIDTH;
+        this.offscreenCanvas.height = RainbowBlockBreaker.HEIGHT;
+        this.offscreenCtx = this.offscreenCanvas.getContext('2d');
+
         document.addEventListener("mousemove", (e) => {
-            this.ctx.fillStyle = "#000000";
-            this.ctx.fillRect(this.bar.x, this.bar.y, this.bar.width, this.bar.height);
+            this.offscreenCtx.fillStyle = 'rgb(0,0,0)';
+            this.offscreenCtx.fillRect(this.bar.x, this.bar.y, this.bar.width, this.bar.height);
 
             this.bar.x = e.clientX - this.canvas.offsetLeft - this.bar.width / 2;
             if (this.bar.x > RainbowBlockBreaker.WIDTH - this.bar.width) {
@@ -73,19 +79,19 @@ class RainbowBlockBreaker {
             } else if (this.bar.x < 0) {
                 this.bar.x = 0;
             }
-            this.ctx.fillStyle = "#00DD00";
-            this.ctx.fillRect(this.bar.x, this.bar.y, this.bar.width, this.bar.height);
         })
     }
 
     update() {
         const _this = this;
-        _this.ctx.resetTransform()
+
+        _this.offscreenCtx.fillStyle = 'black';
+        _this.offscreenCtx.fillRect(0, 0, RainbowBlockBreaker.WIDTH, RainbowBlockBreaker.HEIGHT);
+
         _this.blocks.values.forEach(block => {
             if (block) {
-                // _this.ctx.putImageData(new ImageData(new Uint8ClampedArray([block.color[0], block.color[1], block.color[2], 255]), 1, 1), block.x, block.y);
-                _this.ctx.fillStyle = `rgb(${block.color[0]}, ${block.color[1]}, ${block.color[2]})`;
-                _this.ctx.fillRect(block.x, block.y, 1, 1)
+                _this.offscreenCtx.fillStyle = `rgb(${block.color[0]}, ${block.color[1]}, ${block.color[2]})`;
+                _this.offscreenCtx.fillRect(block.x, block.y, 1, 1)
             }
         });
         const removedBalls = new Array();
@@ -117,8 +123,8 @@ class RainbowBlockBreaker {
                 if (RainbowBlockBreaker.hitTestPoint(_this.bar, ball)) {
                     ball.vy = -Math.abs(ball.vy);
                 }
-                _this.ctx.fillStyle = `rgb(${ball.color[0]}, ${ball.color[1]}, ${ball.color[2]})`;
-                _this.ctx.fillRect(ball.x, ball.y, 1, 1);
+                _this.offscreenCtx.fillStyle = `rgb(${ball.color[0]}, ${ball.color[1]}, ${ball.color[2]})`;
+                _this.offscreenCtx.fillRect(ball.x, ball.y, 1, 1);
             }
         })
         removedBalls.forEach(function (particle) {
@@ -133,8 +139,8 @@ class RainbowBlockBreaker {
             fallParticle.vy += 0.1;
             fallParticle.x += fallParticle.vx;
             fallParticle.y += fallParticle.vy;
-            _this.ctx.fillStyle = `rgb(${fallParticle.color[0]}, ${fallParticle.color[1]}, ${fallParticle.color[2]})`;
-            _this.ctx.fillRect(fallParticle.x, fallParticle.y, 1, 1);
+            _this.offscreenCtx.fillStyle = `rgb(${fallParticle.color[0]}, ${fallParticle.color[1]}, ${fallParticle.color[2]})`;
+            _this.offscreenCtx.fillRect(fallParticle.x, fallParticle.y, 1, 1);
             if (RainbowBlockBreaker.hitTestPoint(_this.bar, fallParticle)) {
                 const newBall = new Particle(fallParticle.x, fallParticle.y);
                 newBall.vx = Math.random() * 10;
@@ -158,6 +164,11 @@ class RainbowBlockBreaker {
             alert("Game End");
             return
         }
+        _this.offscreenCtx.fillStyle = "#00DD00";
+        _this.offscreenCtx.fillRect(_this.bar.x, _this.bar.y, _this.bar.width, _this.bar.height);
+
+        _this.ctx.clearRect(0, 0, RainbowBlockBreaker.WIDTH, RainbowBlockBreaker.HEIGHT);
+        _this.ctx.drawImage(this.offscreenCanvas, 0, 0);
 
         requestAnimationFrame(() => _this.update());
     }
