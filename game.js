@@ -70,16 +70,27 @@ class RainbowBlockBreaker {
         this.offscreenCtx = this.offscreenCanvas.getContext('2d');
 
         document.addEventListener("mousemove", (e) => {
+            // 读取操作
+            const mouseX = e.clientX;
+            const canvasLeft = this.canvas.offsetLeft;
+
+            // 计算新位置
+            let newBarX = mouseX - canvasLeft - this.bar.width / 2;
+
+            // 写入操作
             this.offscreenCtx.fillStyle = 'rgb(0,0,0)';
             this.offscreenCtx.fillRect(this.bar.x, this.bar.y, this.bar.width, this.bar.height);
 
-            this.bar.x = e.clientX - this.canvas.offsetLeft - this.bar.width / 2;
-            if (this.bar.x > RainbowBlockBreaker.WIDTH - this.bar.width) {
-                this.bar.x = RainbowBlockBreaker.WIDTH - this.bar.width;
-            } else if (this.bar.x < 0) {
-                this.bar.x = 0;
+            // 边界检查
+            if (newBarX > RainbowBlockBreaker.WIDTH - this.bar.width) {
+                newBarX = RainbowBlockBreaker.WIDTH - this.bar.width;
+            } else if (newBarX < 0) {
+                newBarX = 0;
             }
-        })
+
+            // 更新bar位置
+            this.bar.x = newBarX;
+        });
     }
 
     update() {
@@ -120,8 +131,10 @@ class RainbowBlockBreaker {
                 if (ball.y > RainbowBlockBreaker.HEIGHT) {
                     removedBalls.push(ball);
                 }
-                if (RainbowBlockBreaker.hitTestPoint(_this.bar, ball)) {
-                    ball.vy = -Math.abs(ball.vy);
+                if (ball.y > _this.bar.y) {
+                    if (RainbowBlockBreaker.hitTestPoint(_this.bar, ball)) {
+                        ball.vy = -Math.abs(ball.vy);
+                    }
                 }
                 _this.offscreenCtx.fillStyle = `rgb(${ball.color[0]}, ${ball.color[1]}, ${ball.color[2]})`;
                 _this.offscreenCtx.fillRect(ball.x, ball.y, 1, 1);
@@ -191,4 +204,15 @@ function hsv2rgb(h, s, v) {
     return [f(5) * 255, f(3) * 255, f(1) * 255];
 }
 
-
+function throttle(callback, limit) {
+    let waiting = false;
+    return function () {
+        if (!waiting) {
+            callback.apply(this, arguments);
+            waiting = true;
+            setTimeout(function () {
+                waiting = false;
+            }, limit);
+        }
+    }
+}
