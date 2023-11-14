@@ -1,0 +1,17 @@
+{
+  "name": "RainbowBrickBreaker-JS",
+  "version": "0.8.0",
+  "description": "A remastered brick breaker game inspired by \"パーティクル崩し\"(Particle Destroyer).",
+  "repository": "https://github.com/zhmou/RainbowBrickBreaker-JS.git",
+  "author": "zhmou <948508913@qq.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "private": true,
+  "dependencies": {
+    "vite": "^4.5.0"
+  }
+}
